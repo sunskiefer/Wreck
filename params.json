@@ -1,0 +1,1781 @@
+{
+ "params": [
+  {
+   "key": "src",
+   "name": "Source",
+   "default": 0,
+   "options": [
+    "NOISE",
+    "CLICKS",
+    "WAV",
+    "FM PING",
+    "HARMONOGRAPH",
+    "CLIFFORD",
+    "SUPERFORMULA",
+    "SPIROGRAPH",
+    "MOIRE",
+    "ATTRACTORS"
+   ]
+  },
+  {
+   "key": "att",
+   "name": "Attractor",
+   "min": 1,
+   "max": 15,
+   "default": 1,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "att_prev",
+   "name": "Attractor Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "att",
+   "step_delta": -1
+  },
+  {
+   "key": "att_next",
+   "name": "Attractor Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "att",
+   "step_delta": 1
+  },
+  {
+   "key": "wav",
+   "name": "WAV file",
+   "min": 0,
+   "max": 63,
+   "default": 0,
+   "display": "int",
+   "dynamic_display": true,
+   "qlink_ticks": 3
+  },
+  {
+   "key": "wav_prev",
+   "name": "WAV file Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "wav",
+   "step_delta": -1
+  },
+  {
+   "key": "wav_next",
+   "name": "WAV file Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "wav",
+   "step_delta": 1
+  },
+  {
+   "key": "wl_1",
+   "name": "WAV Row 1",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_2",
+   "name": "WAV Row 2",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_3",
+   "name": "WAV Row 3",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_4",
+   "name": "WAV Row 4",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_5",
+   "name": "WAV Row 5",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_6",
+   "name": "WAV Row 6",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_7",
+   "name": "WAV Row 7",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wl_8",
+   "name": "WAV Row 8",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "string"
+  },
+  {
+   "key": "wav_scan",
+   "name": "Rescan WAV folder",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_use",
+   "name": "Use WAV as source",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_info",
+   "name": "WAV count",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "src_level",
+   "name": "Source Level",
+   "min": 0,
+   "max": 1,
+   "default": 0.8,
+   "dynamic_display": true
+  },
+  {
+   "key": "src_rate",
+   "name": "Source Rate",
+   "min": 0,
+   "max": 1,
+   "default": 0.5,
+   "dynamic_display": true
+  },
+  {
+   "key": "fb",
+   "name": "Feedback",
+   "min": 0,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "src_prev",
+   "name": "Preview",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "src_gate",
+   "name": "Gate",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "src_tune",
+   "name": "Tune",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "slot1",
+   "name": "Position 1",
+   "default": 0,
+   "options": [
+    "DRIVE",
+    "ECHO",
+    "FILTER",
+    "SHIFT",
+    "SMEAR"
+   ]
+  },
+  {
+   "key": "slot2",
+   "name": "Position 2",
+   "default": 1,
+   "options": [
+    "DRIVE",
+    "ECHO",
+    "FILTER",
+    "SHIFT",
+    "SMEAR"
+   ]
+  },
+  {
+   "key": "slot3",
+   "name": "Position 3",
+   "default": 2,
+   "options": [
+    "DRIVE",
+    "ECHO",
+    "FILTER",
+    "SHIFT",
+    "SMEAR"
+   ]
+  },
+  {
+   "key": "slot4",
+   "name": "Position 4",
+   "default": 3,
+   "options": [
+    "DRIVE",
+    "ECHO",
+    "FILTER",
+    "SHIFT",
+    "SMEAR"
+   ]
+  },
+  {
+   "key": "slot5",
+   "name": "Position 5",
+   "default": 4,
+   "options": [
+    "DRIVE",
+    "ECHO",
+    "FILTER",
+    "SHIFT",
+    "SMEAR"
+   ]
+  },
+  {
+   "key": "b1_on",
+   "name": "Drive On",
+   "default": 1,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "b2_on",
+   "name": "Echo On",
+   "default": 1,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "b3_on",
+   "name": "Filter On",
+   "default": 1,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "b4_on",
+   "name": "Shift On",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "b5_on",
+   "name": "Smear On",
+   "default": 1,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "b1_drive",
+   "name": "Drv Drive",
+   "min": 0,
+   "max": 1,
+   "default": 0.45,
+   "dynamic_display": true
+  },
+  {
+   "key": "b1_tone",
+   "name": "Drv Tone",
+   "min": 0,
+   "max": 1,
+   "default": 0.6,
+   "dynamic_display": true
+  },
+  {
+   "key": "b1_bias",
+   "name": "Drv Bias",
+   "min": -1,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "b1_mix",
+   "name": "Drv Mix",
+   "min": 0,
+   "max": 1,
+   "default": 0.8,
+   "dynamic_display": true
+  },
+  {
+   "key": "b1_level",
+   "name": "Drv Level",
+   "min": 0,
+   "max": 1,
+   "default": 0.75,
+   "dynamic_display": true
+  },
+  {
+   "key": "b2_time",
+   "name": "Ech Time",
+   "min": 0,
+   "max": 1,
+   "default": 0.45,
+   "dynamic_display": true
+  },
+  {
+   "key": "b2_fb",
+   "name": "Ech Feedback",
+   "min": 0,
+   "max": 1,
+   "default": 0.45,
+   "dynamic_display": true
+  },
+  {
+   "key": "b2_tone",
+   "name": "Ech Tone",
+   "min": 0,
+   "max": 1,
+   "default": 0.6,
+   "dynamic_display": true
+  },
+  {
+   "key": "b2_mix",
+   "name": "Ech Mix",
+   "min": 0,
+   "max": 1,
+   "default": 0.4,
+   "dynamic_display": true
+  },
+  {
+   "key": "b2_spread",
+   "name": "Ech Spread",
+   "min": 0,
+   "max": 1,
+   "default": 0.3,
+   "dynamic_display": true
+  },
+  {
+   "key": "b3_cut",
+   "name": "Flt Cut",
+   "min": 0,
+   "max": 1,
+   "default": 0.55,
+   "dynamic_display": true
+  },
+  {
+   "key": "b3_res",
+   "name": "Flt Res",
+   "min": 0,
+   "max": 1,
+   "default": 0.35,
+   "dynamic_display": true
+  },
+  {
+   "key": "b3_env",
+   "name": "Flt Env",
+   "min": -1,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "b3_mix",
+   "name": "Flt Mix",
+   "min": 0,
+   "max": 1,
+   "default": 1.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "b3_level",
+   "name": "Flt Level",
+   "min": 0,
+   "max": 1,
+   "default": 0.75,
+   "dynamic_display": true
+  },
+  {
+   "key": "b4_pitch",
+   "name": "Sft Pitch",
+   "min": -24,
+   "max": 24,
+   "default": 7,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "b4_fine",
+   "name": "Sft Fine",
+   "min": -50,
+   "max": 50,
+   "default": 0,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "b4_fb",
+   "name": "Sft Feedback",
+   "min": 0,
+   "max": 1,
+   "default": 0.3,
+   "dynamic_display": true
+  },
+  {
+   "key": "b4_mix",
+   "name": "Sft Mix",
+   "min": 0,
+   "max": 1,
+   "default": 0.5,
+   "dynamic_display": true
+  },
+  {
+   "key": "b4_level",
+   "name": "Sft Level",
+   "min": 0,
+   "max": 1,
+   "default": 0.75,
+   "dynamic_display": true
+  },
+  {
+   "key": "b5_size",
+   "name": "Smr Size",
+   "min": 0,
+   "max": 1,
+   "default": 0.5,
+   "dynamic_display": true
+  },
+  {
+   "key": "b5_decay",
+   "name": "Smr Decay",
+   "min": 0,
+   "max": 1,
+   "default": 0.55,
+   "dynamic_display": true
+  },
+  {
+   "key": "b5_damp",
+   "name": "Smr Damp",
+   "min": 0,
+   "max": 1,
+   "default": 0.5,
+   "dynamic_display": true
+  },
+  {
+   "key": "b5_mix",
+   "name": "Smr Mix",
+   "min": 0,
+   "max": 1,
+   "default": 0.35,
+   "dynamic_display": true
+  },
+  {
+   "key": "b5_level",
+   "name": "Smr Level",
+   "min": 0,
+   "max": 1,
+   "default": 0.75,
+   "dynamic_display": true
+  },
+  {
+   "key": "v_speed",
+   "name": "Voice Speed",
+   "min": 0,
+   "max": 1,
+   "default": 0.5,
+   "dynamic_display": true
+  },
+  {
+   "key": "v_pitch",
+   "name": "Voice Pitch",
+   "min": -24,
+   "max": 24,
+   "default": 0,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "v_dir",
+   "name": "Voice Direction",
+   "default": 0,
+   "options": [
+    "FWD",
+    "REV",
+    "PING",
+    "RAND"
+   ]
+  },
+  {
+   "key": "v_att",
+   "name": "Voice Attack",
+   "min": 0,
+   "max": 1,
+   "default": 0.2,
+   "dynamic_display": true
+  },
+  {
+   "key": "v_rel",
+   "name": "Voice Release",
+   "min": 0,
+   "max": 1,
+   "default": 0.6,
+   "dynamic_display": true
+  },
+  {
+   "key": "v_mode",
+   "name": "Pitch Mode",
+   "default": 1,
+   "options": [
+    "FREE",
+    "KEY",
+    "LOCK",
+    "PLAY"
+   ]
+  },
+  {
+   "key": "v_count",
+   "name": "Voices",
+   "min": 1,
+   "max": 16,
+   "default": 16,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "v_count_prev",
+   "name": "Voices Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "v_count",
+   "step_delta": -1
+  },
+  {
+   "key": "v_count_next",
+   "name": "Voices Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "v_count",
+   "step_delta": 1
+  },
+  {
+   "key": "o_ball",
+   "name": "Ball Time",
+   "default": 2,
+   "options": [
+    "1/32",
+    "1/16",
+    "1/8",
+    "1/4",
+    "1/2",
+    "1/1"
+   ]
+  },
+  {
+   "key": "o_bounce",
+   "name": "Ball Bounce",
+   "min": 0,
+   "max": 1,
+   "default": 0.4,
+   "dynamic_display": true
+  },
+  {
+   "key": "o_lofi",
+   "name": "Lo-Fi Rate",
+   "min": 0,
+   "max": 1,
+   "default": 0.884,
+   "dynamic_display": true
+  },
+  {
+   "key": "o_stut",
+   "name": "Stutter Size",
+   "default": 1,
+   "options": [
+    "1/32",
+    "1/16",
+    "1/8",
+    "1/4"
+   ]
+  },
+  {
+   "key": "o_mix",
+   "name": "Out Mix",
+   "min": 0,
+   "max": 1,
+   "default": 0.5,
+   "dynamic_display": true
+  },
+  {
+   "key": "o_ball_on",
+   "name": "Ball On",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "o_lofi_on",
+   "name": "Lo-Fi On",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "o_stut_on",
+   "name": "Stutter On",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "o_sync",
+   "name": "Sync",
+   "default": 1,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "a_on",
+   "name": "Arp On",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "a_latch",
+   "name": "Arp Latch",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "a_rate",
+   "name": "Arp Rate",
+   "default": 3,
+   "options": [
+    "1/4",
+    "1/8",
+    "1/8T",
+    "1/16",
+    "1/16T",
+    "1/32"
+   ]
+  },
+  {
+   "key": "a_rate_prev",
+   "name": "Arp Rate Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_rate",
+   "step_delta": -1
+  },
+  {
+   "key": "a_rate_next",
+   "name": "Arp Rate Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_rate",
+   "step_delta": 1
+  },
+  {
+   "key": "a_range",
+   "name": "Arp Range",
+   "default": 1,
+   "options": [
+    "1 OCT",
+    "2 OCT",
+    "3 OCT",
+    "4 OCT"
+   ]
+  },
+  {
+   "key": "a_range_prev",
+   "name": "Arp Range Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_range",
+   "step_delta": -1
+  },
+  {
+   "key": "a_range_next",
+   "name": "Arp Range Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_range",
+   "step_delta": 1
+  },
+  {
+   "key": "a_order",
+   "name": "Arp Order",
+   "default": 0,
+   "options": [
+    "UP",
+    "DOWN",
+    "UP-DN",
+    "RANDOM",
+    "PLAYED"
+   ]
+  },
+  {
+   "key": "a_order_prev",
+   "name": "Arp Order Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_order",
+   "step_delta": -1
+  },
+  {
+   "key": "a_order_next",
+   "name": "Arp Order Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_order",
+   "step_delta": 1
+  },
+  {
+   "key": "a_nlen",
+   "name": "Arp Note Length",
+   "min": 1,
+   "max": 16,
+   "default": 16,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "a_nlen_prev",
+   "name": "Arp Note Length Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_nlen",
+   "step_delta": -1
+  },
+  {
+   "key": "a_nlen_next",
+   "name": "Arp Note Length Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_nlen",
+   "step_delta": 1
+  },
+  {
+   "key": "a_vlen",
+   "name": "Arp Vel Length",
+   "min": 1,
+   "max": 16,
+   "default": 5,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "a_vlen_prev",
+   "name": "Arp Vel Length Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_vlen",
+   "step_delta": -1
+  },
+  {
+   "key": "a_vlen_next",
+   "name": "Arp Vel Length Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_vlen",
+   "step_delta": 1
+  },
+  {
+   "key": "a_glen",
+   "name": "Arp Gate Length",
+   "min": 1,
+   "max": 16,
+   "default": 7,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "a_glen_prev",
+   "name": "Arp Gate Length Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_glen",
+   "step_delta": -1
+  },
+  {
+   "key": "a_glen_next",
+   "name": "Arp Gate Length Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_glen",
+   "step_delta": 1
+  },
+  {
+   "key": "a_olen",
+   "name": "Arp Oct Length",
+   "min": 1,
+   "max": 16,
+   "default": 3,
+   "display": "int",
+   "dynamic_display": true
+  },
+  {
+   "key": "a_olen_prev",
+   "name": "Arp Oct Length Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_olen",
+   "step_delta": -1
+  },
+  {
+   "key": "a_olen_next",
+   "name": "Arp Oct Length Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "a_olen",
+   "step_delta": 1
+  },
+  {
+   "key": "a_n_1",
+   "name": "Arp Note 1",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_2",
+   "name": "Arp Note 2",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_3",
+   "name": "Arp Note 3",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_4",
+   "name": "Arp Note 4",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_5",
+   "name": "Arp Note 5",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_6",
+   "name": "Arp Note 6",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_7",
+   "name": "Arp Note 7",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_8",
+   "name": "Arp Note 8",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_9",
+   "name": "Arp Note 9",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_10",
+   "name": "Arp Note 10",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_11",
+   "name": "Arp Note 11",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_12",
+   "name": "Arp Note 12",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_13",
+   "name": "Arp Note 13",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_14",
+   "name": "Arp Note 14",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_15",
+   "name": "Arp Note 15",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_n_16",
+   "name": "Arp Note 16",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_1",
+   "name": "Arp Vel 1",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_2",
+   "name": "Arp Vel 2",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_3",
+   "name": "Arp Vel 3",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_4",
+   "name": "Arp Vel 4",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_5",
+   "name": "Arp Vel 5",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_6",
+   "name": "Arp Vel 6",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_7",
+   "name": "Arp Vel 7",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_8",
+   "name": "Arp Vel 8",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_9",
+   "name": "Arp Vel 9",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_10",
+   "name": "Arp Vel 10",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_11",
+   "name": "Arp Vel 11",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_12",
+   "name": "Arp Vel 12",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_13",
+   "name": "Arp Vel 13",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_14",
+   "name": "Arp Vel 14",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_15",
+   "name": "Arp Vel 15",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_v_16",
+   "name": "Arp Vel 16",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_1",
+   "name": "Arp Gate 1",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_2",
+   "name": "Arp Gate 2",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_3",
+   "name": "Arp Gate 3",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_4",
+   "name": "Arp Gate 4",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_5",
+   "name": "Arp Gate 5",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_6",
+   "name": "Arp Gate 6",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_7",
+   "name": "Arp Gate 7",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_8",
+   "name": "Arp Gate 8",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_9",
+   "name": "Arp Gate 9",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_10",
+   "name": "Arp Gate 10",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_11",
+   "name": "Arp Gate 11",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_12",
+   "name": "Arp Gate 12",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_13",
+   "name": "Arp Gate 13",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_14",
+   "name": "Arp Gate 14",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_15",
+   "name": "Arp Gate 15",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_g_16",
+   "name": "Arp Gate 16",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_1",
+   "name": "Arp Oct 1",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_2",
+   "name": "Arp Oct 2",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_3",
+   "name": "Arp Oct 3",
+   "min": 0,
+   "max": 1,
+   "default": 1,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_4",
+   "name": "Arp Oct 4",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_5",
+   "name": "Arp Oct 5",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_6",
+   "name": "Arp Oct 6",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_7",
+   "name": "Arp Oct 7",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_8",
+   "name": "Arp Oct 8",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_9",
+   "name": "Arp Oct 9",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_10",
+   "name": "Arp Oct 10",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_11",
+   "name": "Arp Oct 11",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_12",
+   "name": "Arp Oct 12",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_13",
+   "name": "Arp Oct 13",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_14",
+   "name": "Arp Oct 14",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_15",
+   "name": "Arp Oct 15",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "a_o_16",
+   "name": "Arp Oct 16",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "display": "int",
+   "type": "slot"
+  },
+  {
+   "key": "m_chaos",
+   "name": "Chaos",
+   "min": 0,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "m_space",
+   "name": "Space",
+   "min": 0,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "m_grit",
+   "name": "Grit",
+   "min": 0,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "m_body",
+   "name": "Body",
+   "min": 0,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "mon",
+   "name": "Monitor",
+   "default": 0,
+   "options": [
+    "OFF",
+    "SRC",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "LIM"
+   ]
+  },
+  {
+   "key": "mon_t0",
+   "name": "Mon SRC",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "mon_t1",
+   "name": "Mon B1",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "mon_t2",
+   "name": "Mon B2",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "mon_t3",
+   "name": "Mon B3",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "mon_t4",
+   "name": "Mon B4",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "mon_t5",
+   "name": "Mon B5",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "mon_t6",
+   "name": "Mon LIM",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo0",
+   "name": "Solo SRC",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo1",
+   "name": "Solo B1",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo2",
+   "name": "Solo B2",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo3",
+   "name": "Solo B3",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo4",
+   "name": "Solo B4",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo5",
+   "name": "Solo B5",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "solo6",
+   "name": "Solo LIM",
+   "default": 0,
+   "options": [
+    "Off",
+    "On"
+   ]
+  },
+  {
+   "key": "direct",
+   "name": "Direct",
+   "min": 0,
+   "max": 1,
+   "default": 0.0,
+   "dynamic_display": true
+  },
+  {
+   "key": "level",
+   "name": "Level",
+   "min": 0,
+   "max": 1,
+   "default": 0.75,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip0",
+   "name": "Stage SRC",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip1",
+   "name": "Stage B1",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip2",
+   "name": "Stage B2",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip3",
+   "name": "Stage B3",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip4",
+   "name": "Stage B4",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip5",
+   "name": "Stage B5",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "chip6",
+   "name": "Stage LIM",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
+  },
+  {
+   "key": "p_bank",
+   "name": "Bank",
+   "default": 0,
+   "options": [
+    "FACTORY",
+    "USER"
+   ]
+  },
+  {
+   "key": "p_sel",
+   "name": "Preset",
+   "min": 0,
+   "max": 999,
+   "default": 0,
+   "display": "int",
+   "dynamic_display": true,
+   "qlink_ticks": 3
+  },
+  {
+   "key": "p_sel_prev",
+   "name": "Preset Prev",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "p_sel",
+   "step_delta": -1
+  },
+  {
+   "key": "p_sel_next",
+   "name": "Preset Next",
+   "min": 0,
+   "max": 1,
+   "momentary": true,
+   "step_of": "p_sel",
+   "step_delta": 1
+  },
+  {
+   "key": "p_load",
+   "name": "Load",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "p_save",
+   "name": "Save",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "p_init",
+   "name": "Init",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  }
+ ]
+}

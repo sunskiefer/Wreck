@@ -1,0 +1,21 @@
+{
+  "name": "Wreck",
+  "vendor": "L'Cronx",
+  "uid": "AnWr",
+  "version": 1,
+  "so": "wreck.so",
+  "params": "params.json",
+  "layout": "layout.conf",
+  "presets": "presets.json",
+  "skin_post": "common/skin_post.py",
+  "cc": false,
+  "nrpn": false,
+  "defines": {
+    "PARAM_TEXT_MAX": 32,
+    "MODULE_SUBDIR": "\"data\"",
+    "SAMPLE_ACCURATE": 1,
+    "HAS_SONG_POS": 1,
+    "HAS_DISPLAY_REV": 1
+  },
+  "art": "html"
+}

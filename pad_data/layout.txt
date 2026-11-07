@@ -1,0 +1,5 @@
+# Wreck: where the buffer strip (waveform + playhead) sits on the page, in page pixels (the page is 1280 x 628; 0,0 is its top-left).
+# id    x   y    w     h
+view    64  152  1152  40
+# Change the numbers and restart MPC (or remove and re-insert the plugin): only this line moves the strip.
+# The skin draws the box (32,114 1216x84) and the BUFFER 20 S caption; the plugin draws only the waveform and playhead in this area.
