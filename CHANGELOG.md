@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.1.2
+* Verified working on an Akai Force (2026-11-07).
 * Knobs use the 126 px, 128-frame picture format that other Force plugins run on, to stop the knob picture sliding out of its window as the value changes. The knobs are smaller than in 0.1.1.
 * Knobs sit a little lower on the pages.
 

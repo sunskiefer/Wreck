@@ -1,5 +1,7 @@
 # Wreck 0.1.2 – pass / fail checklist
 
+**Update 2026-11-07:** 0.1.2 has been verified working on an Akai Force (reported by the maintainer). The NOT RUN rows below were written before that test and have not been individually re-ticked.
+
 PASS = checked in this build. NOT RUN = needs the Force (or a person) and has not been done. FAIL = known problem.
 
 ## Build and package

@@ -39,8 +39,8 @@ Needs MPC OS 3.x on an armv7 Force/MPC. Download `Wreck-<version>-mpc-armv7.zip`
 
 ## Status
 
-0.1.2 is built and passes the installer and catalog checks. It has not yet been confirmed on a Force: see the changelog for what
-is still being checked (the knob display and the SAMPLES page).
+0.1.2 is built, passes the installer and catalog checks, and has been verified working on an Akai Force (2026-11-07). The checklist and the
+remaining open items are in `docs/CHECKLIST.md` and `docs/UNVERIFIED.md`.
 
 ## Support
 

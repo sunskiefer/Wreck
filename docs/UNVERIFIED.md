@@ -1,5 +1,7 @@
 # Wreck 0.1.2 – unverified items, guesses, and what differs from the mock-up
 
+**Update 2026-11-07:** 0.1.2 has been verified working on an Akai Force (reported by the maintainer). The notes below were written before that test; they list what was changed and what the offline checks could not show.
+
 ## Changed in 0.1.1 and 0.1.2, not yet confirmed on the Force
 
 * **Knobs scrolling out of place** (0.1.0 and 0.1.1, your video). In the video the knob picture is fine at 0 % and slides further out of its window the higher the value goes, which means MPC steps through the strip with a slightly different frame height than the picture has. My 0.1.1 fix (a smaller total picture, 60 frames) did not cure it, so that explanation was wrong. 0.1.2 uses the knob picture format other plugins already run on the Force: 126 px frames, 128 of them, `numFrames` 127 (126 x 16128 px). The knob is smaller than your mock-up (126 px instead of 176 px). If it still scrolls, I need another short video; then the cause is something else in Wreck's skin.
