@@ -1,6 +1,7 @@
 # Changelog
 
-## 0.2.0
+## 0.3.0
+* Verified on an Akai Force (2026-11-08): the file browser loads WAV files from any folder. (A first package of this same plugin was published as 0.2.0 before the test; 0.3.0 is the verified release and carries the identical plugin file.)
 * SAMPLES is now a file browser, so samples can live on the external drive instead of the main card. It lists the folder you are in (folders first, then `.wav` files), starts in the folder you used last (else `/media`, else `/`), and goes anywhere from the root `/`.
 * New buttons: BACK and FWD (folder history), UP, ROOT, OPEN / LOAD. Tap a row: a folder opens, `..` goes up, a WAV loads and becomes the source. The data wheel / WAV FILE stepper walks the list; stepping onto a WAV loads it, OPEN / LOAD opens a folder.
 * The folder you are in is shown at the top of the page; the count shows folders and WAV files. RESCAN re-reads the folder (use it after plugging in a drive).
