@@ -42,6 +42,10 @@ Needs MPC OS 3.x on an armv7 Force/MPC. Download `Wreck-<version>-mpc-armv7.zip`
 0.1.2 is built, passes the installer and catalog checks, and has been verified working on an Akai Force (2026-11-07). The checklist and the
 remaining open items are in `docs/CHECKLIST.md` and `docs/UNVERIFIED.md`.
 
+## License
+
+MIT, see [LICENSE](LICENSE).
+
 ## Support
 
 Free plugin. Tips: ko-fi.com/lcronx
