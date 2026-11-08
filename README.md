@@ -44,7 +44,7 @@ remaining open items are in `docs/CHECKLIST.md` and `docs/UNVERIFIED.md`.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+PolyForm Noncommercial 1.0.0, see [LICENSE](LICENSE). The source is public and free to use, change and share for any noncommercial purpose; selling Wreck or using it commercially is not permitted.
 
 ## Support
 
