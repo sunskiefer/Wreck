@@ -1,7 +1,7 @@
 # Wreck – user guide
 
 **A self-sampling instrument for the Akai Force and MPC OS (VST2, armv7).**
-Vendor: L'Cronx. Plugin UID: `AnWr`. Version 0.1.2.
+Vendor: L'Cronx. Plugin UID: `AnWr`. Version 0.1.3.
 
 Wreck listens to itself. A *source* (noise, clicks, a WAV file, a maths-driven generator) runs through a chain of five
 effect blocks and a limiter. The result is recorded all the time into a 20 second circular buffer. The notes you play are

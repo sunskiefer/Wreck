@@ -1,5 +1,7 @@
 # Wreck 0.1.2 – unverified items, guesses, and what differs from the mock-up
 
+**Update 2026-11-08:** 0.1.3 has the same plugin file as 0.1.2 (identical `wreck.so`); only the license changed. The notes below describe 0.1.2.
+
 **Update 2026-11-07:** 0.1.2 has been verified working on an Akai Force (reported by the maintainer). The notes below were written before that test; they list what was changed and what the offline checks could not show.
 
 ## Changed in 0.1.1 and 0.1.2, not yet confirmed on the Force

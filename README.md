@@ -1,6 +1,6 @@
 # Wreck
 
-**A sound design instrument for the Akai Force and MPC OS (VST2, ARMv7).** Vendor: L'Cronx. Current version: 0.1.2.
+**A sound design instrument for the Akai Force and MPC OS (VST2, ARMv7).** Vendor: L'Cronx. Current version: 0.1.3.
 
 Wreck is made for experimenting. It records its own sound into a 20 second loop, and your MIDI notes play that loop back as voices:
 slower, faster, higher, lower, reversed, from fresh or older material. What the voices play can be fed back into the front of the
@@ -39,7 +39,7 @@ Needs MPC OS 3.x on an armv7 Force/MPC. Download `Wreck-<version>-mpc-armv7.zip`
 
 ## Status
 
-0.1.2 is built, passes the installer and catalog checks, and has been verified working on an Akai Force (2026-11-07). The checklist and the
+0.1.3 is built and passes the installer and catalog checks. It carries the same plugin file as 0.1.2 (byte for byte); only the license changed. 0.1.2 was verified working on an Akai Force (2026-11-07). The checklist and the
 remaining open items are in `docs/CHECKLIST.md` and `docs/UNVERIFIED.md`.
 
 ## License
