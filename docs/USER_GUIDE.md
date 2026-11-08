@@ -1,7 +1,7 @@
 # Wreck – user guide
 
 **A self-sampling instrument for the Akai Force and MPC OS (VST2, armv7).**
-Vendor: L'Cronx. Plugin UID: `AnWr`. Version 0.1.3.
+Vendor: L'Cronx. Plugin UID: `AnWr`. Version 0.2.0.
 
 Wreck listens to itself. A *source* (noise, clicks, a WAV file, a maths-driven generator) runs through a chain of five
 effect blocks and a limiter. The result is recorded all the time into a 20 second circular buffer. The notes you play are
@@ -28,11 +28,11 @@ Folders inside `data/`:
 
 | Folder | Purpose |
 |---|---|
-| `data/wav/` | Put your `.wav` files here (16/24/32-bit PCM or 32-bit float, up to 30 s each). They appear on the **SAMPLES** page. |
+| `data/wav/` | Optional. The **SAMPLES** page browses the whole drive; this folder is just one place you can browse to. |
 | `data/user/` | Your saved presets (`U0001.wreck`, `U0002.wreck`, …). Plain text, one per preset. |
 | `data/layout.txt` | Where the waveform strip is drawn on screen. Leave it alone unless you know why. |
 
-Preset files store the **name** of the WAV file, not its position, so adding or removing files never changes what a preset loads.
+Preset files store the **folder and name** of the WAV file, not its position, so adding or removing files never changes what a preset loads. The drive must be connected when you load such a preset.
 
 ---
 
@@ -108,7 +108,7 @@ Q-Links: SOURCE LEVEL, RATE, FEEDBACK, ATTRACTOR, PREVIEW, GATE, TUNE, WAV FILE.
 **Steppers** (use the `<` `>` arrows, or the Q-Link)
 
 * **ATTRACTOR** – 1…15: Lorenz, Rössler, Chen, Lu, Thomas, Halvorsen, Aizawa, Dadras, Sprott B, C, D, E, F, G, H. Only used by the ATTRACTORS source.
-* **WAV FILE** – on the SAMPLES page; chooses a file from `data/wav/`. Use with the WAV source.
+* **WAV FILE** – on the SAMPLES page; chooses an entry (folder or file) in the folder you are browsing. Use with the WAV source.
 
 **Toggles**
 
@@ -116,19 +116,26 @@ Q-Links: SOURCE LEVEL, RATE, FEEDBACK, ATTRACTOR, PREVIEW, GATE, TUNE, WAV FILE.
 * **GATE** – the source only sounds while a key is held (with a slow release), so notes start and stop sound.
 * **TUNE** – the source's RATE follows the last note played (60 = unchanged), so the source becomes playable.
 
-### SAMPLES – load your own WAV files
-Q-Links: WAV FILE, RESCAN, PLAY AS SOURCE.
+### SAMPLES – browse and load your own WAV files
+Q-Links: WAV FILE, OPEN / LOAD, UP, BACK.
 
-1. Copy your `.wav` files (16/24/32-bit PCM or 32-bit float, up to 30 s each, up to 64 files) into
-   `/sdcard/Synths/L'Cronx - VST - Wreck/data/wav` on the Force. The path is printed at the bottom of this page.
-2. Open the SAMPLES page and tap **RESCAN**, so files copied after the plugin was loaded show up.
-3. The list shows eight files at a time (the group of eight that holds the chosen file; the chosen file has the gold border).
-   **Tap a file** to load it. Tapping also switches the INPUT source to WAV.
-4. The **WAV FILE** stepper (`<` `>`, the Q-Link, or the data wheel) walks through all the files and stops at the last one.
-   It only changes the file, so press **PLAY AS SOURCE** to switch the source to WAV afterwards.
-5. The count at the bottom left reads NO FILES until something is found.
+The page is a file browser. Samples can stay on the external drive; nothing has to be copied to the main card.
 
-On the INPUT page the WAV source speed is **RATE**. A user preset remembers the file by name.
+1. The line at the top shows the folder you are in. The list below shows its folders (`/NAME`) first, then its `.wav` files
+   (16/24/32-bit PCM or 32-bit float, up to 30 s each), eight rows at a time; the chosen row has the gold border. The first row `..` goes one folder up.
+2. **Tap a folder** to open it. **Tap a WAV** to load it; tapping also switches the INPUT source to WAV.
+3. **UP** goes to the parent folder (the cursor lands on the folder you came out of). **ROOT** jumps to `/`, the very top of the tree.
+   **BACK** and **FWD** walk through the folders you have visited, like a browser.
+4. The first time, Wreck starts in `/media` (or `/` if there is none). Wreck does not know where your Force mounts the external drive,
+   so look for it from ROOT (for example under `/media` or `/mnt`). After that it opens in the folder you used last.
+5. The **WAV FILE** stepper (`<` `>`, the Q-Link, or the data wheel) moves the gold border through all entries of the folder, page after page.
+   Stepping onto a WAV loads it. **OPEN / LOAD** does the same as tapping the chosen row: it opens a folder or loads the WAV and makes it the source.
+   **PLAY AS SOURCE** only switches the source to WAV.
+6. **RESCAN** reads the folder again; use it after plugging in a drive or copying files. The count at the bottom left shows the folders and WAV files here
+   (EMPTY, or CANNOT OPEN if a folder cannot be read; go UP or BACK).
+7. Hidden files (names starting with a dot) are not listed. A folder shows up to 1023 entries.
+
+On the INPUT page the WAV source speed is **RATE**. A user preset remembers the file by folder and name.
 
 ### CHAIN – the order of the five blocks
 Q-Links: POSITION 1…5, then the five block ON switches.
@@ -256,7 +263,7 @@ Q-Links: BANK, PRESET, LOAD, SAVE, INIT.
 * **SAVE** – saves the current sound to the USER bank as the next free number (`U0001`, `U0002`, …). There is no limit.
 * **INIT** – resets everything to defaults.
 
-User presets store every control and the **name** of the WAV file.
+User presets store every control and the **folder and name** of the WAV file.
 
 ---
 
@@ -299,7 +306,7 @@ A way of working that suits it:
 **An evolving drone bed.** SOURCE: ATTRACTORS (try Lorenz or Thomas), RATE low. SMEAR with a long DECAY and a high MIX, ECHO with moderate FEEDBACK.
 PITCH MODE PLAY, ATTACK and RELEASE long (around 1 s or more). Hold a chord and nudge CHAOS very slightly so the pitch and filter wander.
 
-**An instrument from your own recording.** Copy a WAV into `data/wav`, pick it on SAMPLES, and press PLAY AS SOURCE. Keep RATE at 1.00 X, set PITCH MODE PLAY,
+**An instrument from your own recording.** Put a WAV on your drive, pick it on SAMPLES, and press PLAY AS SOURCE. Keep RATE at 1.00 X, set PITCH MODE PLAY,
 then add FILTER and DRIVE. You are now playing a texture made from your recording, as it sounded a moment ago, and as the chain changes it.
 
 **Rhythm out of nothing.** SOURCE: CLICKS. ECHO with a short TIME and high FEEDBACK turns the clicks into pitched repeats. Turn ARP on, LATCH on,
@@ -341,4 +348,4 @@ Lower the master LEVEL on MONITOR before you explore very loud settings.
 * No memory allocation, file access or waiting in the audio thread. WAV loading and preset files are handled by a worker thread.
 * The buffer is 20 seconds (882,000 stereo frames).
 * Built for armv7 hard-float with a glibc ceiling of 2.17.
-* Parameter count: 199 (including internal arp lane steps, sample-list rows and Q-Link arrows).
+* Parameter count: 205 (including internal arp lane steps, sample-list rows, browser buttons and Q-Link arrows).

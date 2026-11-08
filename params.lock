@@ -197,3 +197,9 @@ p_sel_next
 p_load
 p_save
 p_init
+wav_up
+wav_root
+wav_back
+wav_fwd
+wav_open
+wav_path

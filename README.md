@@ -1,6 +1,6 @@
 # Wreck
 
-**A sound design instrument for the Akai Force and MPC OS (VST2, ARMv7).** Vendor: L'Cronx. Current version: 0.1.3.
+**A sound design instrument for the Akai Force and MPC OS (VST2, ARMv7).** Vendor: L'Cronx. Current version: 0.2.0.
 
 Wreck is made for experimenting. It records its own sound into a 20 second loop, and your MIDI notes play that loop back as voices:
 slower, faster, higher, lower, reversed, from fresh or older material. What the voices play can be fed back into the front of the
@@ -16,8 +16,8 @@ new sounds for hours.
 * **An output bus** with a bouncing-ball delay, lo-fi and stutter, synced to the project tempo.
 * **An arpeggiator with four polymetric lanes** (note, velocity, gate, octave) that plays the voices itself.
 * **Four macros** (Chaos, Space, Grit, Body), **Monitor and Solo** on every stage, and a **direct** path.
-* **22 factory presets and unlimited user presets.** A preset stores the WAV file by name.
-* **A SAMPLES page** to load your own WAV files by tapping them in a list.
+* **22 factory presets and unlimited user presets.** A preset stores the WAV file by folder and name.
+* **A SAMPLES file browser** to load your own WAV files from anywhere, including an external drive: walk the whole folder tree from `/` (UP, ROOT, BACK, FWD), tap a folder to open it and a WAV to load it.
 
 ## The panel
 
@@ -29,8 +29,7 @@ experimentation, so the screen stays out of the way and every stage of the chain
 ## Install
 
 Needs MPC OS 3.x on an armv7 Force/MPC. Download `Wreck-<version>-mpc-armv7.zip` from the Releases page, unzip it, and follow
-`INSTALL.md` inside (or run `install.sh` on the device). Copy your own `.wav` files into
-`/sdcard/Synths/L'Cronx - VST - Wreck/data/wav`, then open the SAMPLES page and tap RESCAN.
+`INSTALL.md` inside (or run `install.sh` on the device). Put your `.wav` files on the external drive (or anywhere), then open the SAMPLES page and browse to them.
 
 ## Documentation
 
@@ -39,7 +38,7 @@ Needs MPC OS 3.x on an armv7 Force/MPC. Download `Wreck-<version>-mpc-armv7.zip`
 
 ## Status
 
-0.1.3 is built and passes the installer and catalog checks. It carries the same plugin file as 0.1.2 (byte for byte); only the license changed. 0.1.2 was verified working on an Akai Force (2026-11-07). The checklist and the
+0.2.0 is built and passes the installer and catalog checks; the new file browser has been tested offline only (not yet on a Force). 0.1.2 was verified working on an Akai Force (2026-11-07). The checklist and the
 remaining open items are in `docs/CHECKLIST.md` and `docs/UNVERIFIED.md`.
 
 ## License

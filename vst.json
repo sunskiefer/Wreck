@@ -11,7 +11,7 @@
   "cc": false,
   "nrpn": false,
   "defines": {
-    "PARAM_TEXT_MAX": 32,
+    "PARAM_TEXT_MAX": 64,
     "MODULE_SUBDIR": "\"data\"",
     "SAMPLE_ACCURATE": 1,
     "HAS_SONG_POS": 1,

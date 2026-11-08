@@ -200,16 +200,22 @@ enum {
     P_p_load,
     P_p_save,
     P_p_init,
+    P_wav_up,
+    P_wav_root,
+    P_wav_back,
+    P_wav_fwd,
+    P_wav_open,
+    P_wav_path,
     NP
 };
-enum { F_PCT, F_RATE, F_SPEEDX, F_ST, F_MS, F_HZ, F_TIME, F_DB, F_BIPCT, F_CENTS, F_INT, F_LOFI, F_NAME, F_STEPS, F_NUM, F_CHIP, F_WINFO, F_OPT, F_TRIG, F_SLOT };
+enum { F_PCT, F_RATE, F_SPEEDX, F_ST, F_MS, F_HZ, F_TIME, F_DB, F_BIPCT, F_CENTS, F_INT, F_LOFI, F_NAME, F_STEPS, F_NUM, F_CHIP, F_WINFO, F_WPATH, F_OPT, F_TRIG, F_SLOT };
 typedef struct { const char *key; float lo, hi, def; int fmt; int nopt; } wp_t;
 static const wp_t WP[NP] = {
     {"src", 0.0, 9.0, 0.0, F_OPT, 10},
     {"att", 1.0, 15.0, 1.0, F_INT, 0},
     {"att_prev", 0.0, 1.0, 0.0, F_TRIG, 0},
     {"att_next", 0.0, 1.0, 0.0, F_TRIG, 0},
-    {"wav", 0.0, 63.0, 0.0, F_NAME, 0},
+    {"wav", 0.0, 1023.0, 0.0, F_NAME, 0},
     {"wav_prev", 0.0, 1.0, 0.0, F_TRIG, 0},
     {"wav_next", 0.0, 1.0, 0.0, F_TRIG, 0},
     {"wl_1", 0.0, 1.0, 0.0, F_NUM, 0},
@@ -404,6 +410,12 @@ static const wp_t WP[NP] = {
     {"p_load", 0.0, 1.0, 0.0, F_TRIG, 0},
     {"p_save", 0.0, 1.0, 0.0, F_TRIG, 0},
     {"p_init", 0.0, 1.0, 0.0, F_TRIG, 0},
+    {"wav_up", 0.0, 1.0, 0.0, F_TRIG, 0},
+    {"wav_root", 0.0, 1.0, 0.0, F_TRIG, 0},
+    {"wav_back", 0.0, 1.0, 0.0, F_TRIG, 0},
+    {"wav_fwd", 0.0, 1.0, 0.0, F_TRIG, 0},
+    {"wav_open", 0.0, 1.0, 0.0, F_TRIG, 0},
+    {"wav_path", 0.0, 1.0, 0.0, F_WPATH, 0},
 };
 static const char *const SRC_NAMES[] = {"NOISE","CLICKS","WAV","FM PING","HARMONOGRAPH","CLIFFORD","SUPERFORMULA","SPIROGRAPH","MOIRE","ATTRACTORS"};
 static const char *const DIV_NAMES[] = {"1/32","1/16","1/8","1/4","1/2","1/1"};

@@ -48,11 +48,12 @@
    "key": "wav",
    "name": "WAV file",
    "min": 0,
-   "max": 63,
+   "max": 1023,
    "default": 0,
    "display": "int",
    "dynamic_display": true,
-   "qlink_ticks": 3
+   "qlink_ticks": 3,
+   "nudge_pct": 10
   },
   {
    "key": "wav_prev",
@@ -1776,6 +1777,49 @@
    "min": 0,
    "max": 1,
    "momentary": true
+  },
+  {
+   "key": "wav_up",
+   "name": "Folder up",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_root",
+   "name": "Folder root",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_back",
+   "name": "Folder back",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_fwd",
+   "name": "Folder forward",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_open",
+   "name": "Open or load",
+   "min": 0,
+   "max": 1,
+   "momentary": true
+  },
+  {
+   "key": "wav_path",
+   "name": "Folder path",
+   "min": 0,
+   "max": 1,
+   "default": 0,
+   "dynamic_display": true
   }
  ]
 }

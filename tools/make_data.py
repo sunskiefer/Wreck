@@ -7,7 +7,7 @@ import os
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # display formats the engine knows (wparams.h F_*): the engine writes the text for a knob; the value stays a plain number
-FMT = ["PCT", "RATE", "SPEEDX", "ST", "MS", "HZ", "TIME", "DB", "BIPCT", "CENTS", "INT", "LOFI", "NAME", "STEPS", "NUM", "CHIP", "WINFO"]
+FMT = ["PCT", "RATE", "SPEEDX", "ST", "MS", "HZ", "TIME", "DB", "BIPCT", "CENTS", "INT", "LOFI", "NAME", "STEPS", "NUM", "CHIP", "WINFO", "WPATH"]
 
 P = []          # (key, name, spec)
 
@@ -56,8 +56,8 @@ DIV = ["1/32", "1/16", "1/8", "1/4", "1/2", "1/1"]
 # ---- INPUT
 opt("src", "Source", SRC, 0)
 stepper("att", "Attractor", 1, 15, 1, "INT")
-stepper("wav", "WAV file", 0, 63, 0, "NAME")
-# the SAMPLES page: eight file rows (the page of eight that holds the chosen file), rescan, use as source, file count
+stepper("wav", "WAV file", 0, 1023, 0, "NAME")
+# the SAMPLES page: a file browser. eight rows (the page of eight that holds the cursor: folders and WAV files), rescan, use as source, count
 for i in range(8):
     P.append(dict(key="wl_%d" % (i + 1), name="WAV Row %d" % (i + 1), min=0, max=1, default=0, display="string", fmt="NUM"))
 trig("wav_scan", "Rescan WAV folder")
@@ -155,6 +155,13 @@ stepper("p_sel", "Preset", 0, 999, 0, "NAME")
 trig("p_load", "Load")
 trig("p_save", "Save")
 trig("p_init", "Init")
+# ---- SAMPLES browser (appended last so saved projects keep their parameter positions): UP, ROOT, BACK, FWD, OPEN and the folder path
+trig("wav_up", "Folder up")
+trig("wav_root", "Folder root")
+trig("wav_back", "Folder back")
+trig("wav_fwd", "Folder forward")
+trig("wav_open", "Open or load")
+P.append(dict(key="wav_path", name="Folder path", min=0, max=1, default=0, dynamic_display=True, fmt="WPATH"))
 
 KEYS = [p["key"] for p in P]
 assert len(KEYS) == len(set(KEYS)), "duplicate key"
@@ -221,6 +228,8 @@ def write_params():
         r = {k: p[k] for k in keep if k in p}
         if p["key"] in ("wav", "p_sel"):
             r["qlink_ticks"] = 3
+        if p["key"] == "wav":
+            r["nudge_pct"] = 10          # up to 1023 entries: a Q-Link event or wheel click is one step, not eight to ten
         rows.append(r)
     json.dump({"params": rows}, open(os.path.join(HERE, "params.json"), "w"), indent=1)
 

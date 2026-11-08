@@ -31,6 +31,8 @@
 #define TAU 6.28318531f
 #define MAXWAV (SR * 30)
 #define MAXUSER 4096
+#define MAXENT 1024                     /* entries of one folder the browser lists (folders + WAV files) */
+#define HN 24                           /* folders the BACK / FWD history remembers */
 
 /* the Force's glibc is older than powf@GLIBC_2.27: powf is our own (exp2f and log2f carry old symbol versions) */
 static inline float wr_powf(float a, float b) { return a <= 0.0f ? 0.0f : exp2f(b * log2f(a)); }
@@ -78,19 +80,29 @@ typedef struct {
     char key[160], name[64];
 } ent_t;
 
+/* the SAMPLES browser: one folder's listing. e[0] is ".." (dir == 2) unless the folder is "/"; then folders (dir == 1), then .wav files */
+typedef struct { char name[96]; unsigned char dir; } fe_t;
+typedef struct { char dir[512]; fe_t e[MAXENT]; int n, nd, nw; } flist_t;
+enum { NV_NONE, NV_RESCAN, NV_PATH, NV_UP, NV_ROOT, NV_BACK, NV_FWD };
+
 typedef struct {
     float v[NP];                        /* natural-unit values */
     char data_dir[600];
     uint32_t rng;
     /* worker */
     pthread_t th; pthread_mutex_t mu; pthread_cond_t cv; int quit, started;
-    int req_scan, req_wav, req_save, req_user;
-    float save_v[NP]; char save_wav[64];
+    int req_scan, req_save, req_user;
+    int nq_head, nq_tail;                                          /* browser moves wait here, in order (a double tap on UP goes up twice) */
+    struct { int nav, selload; char path[512], sel[96]; } nq[8];
+    int req_wavf; char req_wavp[700];                              /* load this WAV file (full path) */
+    float save_v[NP]; char save_wav[96], save_wavdir[512];
     char *pend_text;                    /* a user preset's text, handed to render */
-    char wavnames[64][64]; int nwav;
+    flist_t *fl[2]; volatile int fl_act;                           /* the folder shown (worker fills the other one, then swaps) */
+    volatile int fl_err;                                           /* the last folder move failed (cannot open) */
+    char hist[HN][512]; int hn, hp;                                /* folder history, worker only */
+    char wav_loaded[700];                                          /* full path of the WAV that is loaded */
     char usernames[MAXUSER][24]; int nuser;
     wav_t wavs[2]; volatile int wav_act; volatile int wav_busy;
-    int wav_loaded_idx;
     volatile int rev;                   /* display_rev */
     char logp[700];
     /* buffer */
@@ -128,6 +140,13 @@ typedef struct {
     float e_cut, e_dl, e_drv;
 } wr_t;
 
+#define FLA(s) ((s)->fl[__atomic_load_n(&(s)->fl_act, __ATOMIC_ACQUIRE)])
+static void post_nav(wr_t *s, int nav, const char *path, const char *sel, int selload);
+/* the full path of entry k of a listing ("/" + name in the root) */
+static void ent_full(const flist_t *f, int k, char *out, size_t n) {
+    if (!strcmp(f->dir, "/")) snprintf(out, n, "/%s", f->e[k].name); else snprintf(out, n, "%s/%s", f->dir, f->e[k].name);
+}
+
 /* ---------------------------------------------------------------------------------------------- display text */
 static void fmt_value(wr_t *s, int i, float v, char *buf, int n) {
     const wp_t *p = &WP[i];
@@ -157,11 +176,27 @@ static void fmt_value(wr_t *s, int i, float v, char *buf, int n) {
         break;
     }
     case F_INT: snprintf(buf, n, "%d", (int)lroundf(v)); break;
-    case F_WINFO: if (s->nwav > 0) snprintf(buf, n, "%d FILE%s", s->nwav, s->nwav == 1 ? "" : "S"); else snprintf(buf, n, "NO FILES"); break;
+    case F_WINFO: {                                 /* what the folder holds */
+        const flist_t *f = FLA(s);
+        if (s->fl_err) snprintf(buf, n, "CANNOT OPEN");
+        else if (f->nd == 0 && f->nw == 0) snprintf(buf, n, "EMPTY");
+        else snprintf(buf, n, "%d DIR  %d WAV", f->nd, f->nw);
+        break;
+    }
+    case F_WPATH: {                                 /* the folder you are in; a long path shows its end */
+        const flist_t *f = FLA(s);
+        size_t l = strlen(f->dir);
+        if (l > 58) snprintf(buf, n, "..%s", f->dir + l - 56); else snprintf(buf, n, "%s", f->dir[0] ? f->dir : "/");
+        break;
+    }
     case F_NAME:
         if (i == P_wav) {
             int k = (int)lroundf(v);
-            if (k >= 0 && k < s->nwav) snprintf(buf, n, "%s", s->wavnames[k]); else snprintf(buf, n, "NO FILE");
+            const flist_t *f = FLA(s);
+            if (k >= 0 && k < f->n) {
+                if (f->e[k].dir == 2) snprintf(buf, n, ".. UP");
+                else snprintf(buf, n, "%s%s", f->e[k].dir ? "/" : "", f->e[k].name);
+            } else snprintf(buf, n, "EMPTY");
         } else {                                    /* the preset page */
             int k = (int)lroundf(s->v[P_p_sel]);
             if (s->v[P_p_bank] < 0.5f) snprintf(buf, n, "%02d %s", k + 1, k >= 0 && k < 22 ? FACT[k].name : "-");
@@ -289,7 +324,7 @@ static void set_idx(wr_t *s, int i, float v) {
 /* a user preset's text: "key=value" lines */
 static void apply_text(wr_t *s, const char *t) {
     apply_defaults(s, 1);
-    char line[256];
+    char line[700], wdir[512] = "", wname[96] = "";
     const char *p = t;
     while (*p) {
         size_t n = strcspn(p, "\n");
@@ -301,14 +336,14 @@ static void apply_text(wr_t *s, const char *t) {
                 *eq = 0;
                 int k = key_index(line);
                 if (k >= 0 && k != P_p_bank && k != P_p_sel) set_idx(s, k, (float)atof(eq + 1));
-                else if (!strcmp(line, "wavname")) {
-                    for (int w = 0; w < s->nwav; w++) if (!strcmp(s->wavnames[w], eq + 1)) { s->v[P_wav] = (float)w; break; }
-                }
+                else if (!strcmp(line, "wavname")) snprintf(wname, sizeof wname, "%s", eq + 1);
+                else if (!strcmp(line, "wavdir")) snprintf(wdir, sizeof wdir, "%s", eq + 1);
             }
         }
         p += n;
         if (*p == '\n') p++;
     }
+    if (wname[0]) post_nav(s, wdir[0] ? NV_PATH : NV_RESCAN, wdir, wname, 1);   /* the folder, the file in it: go there and load it */
     __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
 }
 
@@ -320,28 +355,13 @@ static void load_factory(wr_t *s, int idx) {
 }
 
 /* ---------------------------------------------------------------------------------------------- worker thread */
-static void scan_all(wr_t *s) {
+static void scan_user(wr_t *s) {
     char dir[700];
-    snprintf(dir, sizeof dir, "%s/wav", s->data_dir);
-    DIR *d = opendir(dir);
-    int n = 0;
-    char (*tmp)[64] = calloc(64, 64);
-    if (!tmp) return;
-    if (d) {
-        struct dirent *e;
-        while ((e = readdir(d)) && n < 64) {
-            if (has_wav_ext(e->d_name) && strlen(e->d_name) < 63) { snprintf(tmp[n], 64, "%s", e->d_name); n++; }
-        }
-        closedir(d);
-    }
-    qsort(tmp, (size_t)n, 64, cmp_names);
-    memcpy(s->wavnames, tmp, sizeof(char) * 64 * (size_t)n);
-    __atomic_store_n(&s->nwav, n, __ATOMIC_RELEASE);
     snprintf(dir, sizeof dir, "%s/user", s->data_dir);
-    d = opendir(dir);
+    DIR *d = opendir(dir);
     int m = 0;
     char (*ut)[24] = calloc(MAXUSER, 24);
-    if (!ut) { free(tmp); return; }
+    if (!ut) { if (d) closedir(d); return; }
     if (d) {
         struct dirent *e;
         while ((e = readdir(d)) && m < MAXUSER) {
@@ -354,17 +374,69 @@ static void scan_all(wr_t *s) {
     memcpy(s->usernames, ut, 24 * (size_t)m);
     __atomic_store_n(&s->nuser, m, __ATOMIC_RELEASE);
     __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
-    free(tmp); free(ut);
-    wlog(s, "scan: %d WAV files, %d user presets", n, m);
+    free(ut);
+    wlog(s, "scan: %d user presets", m);
 }
 
-static void worker_load_wav(wr_t *s, int idx) {
-    if (idx < 0 || idx >= s->nwav) return;
-    char path[800];
-    snprintf(path, sizeof path, "%s/wav/%s", s->data_dir, s->wavnames[idx]);
+/* ---- the SAMPLES browser (worker thread) */
+static int cmp_fe(const void *a, const void *b) {
+    const fe_t *x = a, *y = b;
+    if (x->dir != y->dir) return (int)y->dir - (int)x->dir;           /* folders first */
+    return strcasecmp(x->name, y->name);
+}
+
+static int path_is_dir(const char *dir, const struct dirent *e) {
+    if (e->d_type == DT_DIR) return 1;
+    if (e->d_type == DT_REG) return 0;
+    char full[700];                                                    /* unknown or a link: ask the file system */
+    struct stat st;
+    snprintf(full, sizeof full, "%s/%s", strcmp(dir, "/") ? dir : "", e->d_name);
+    return stat(full, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+/* list `path` into the listing the UI is not reading, then swap. The cursor goes to the entry called `sel` (else the first). 0 = ok */
+static int list_dir(wr_t *s, const char *path, const char *sel, int *found) {
+    DIR *d = opendir(path);
+    if (found) *found = -1;
+    if (!d) { s->fl_err = 1; wlog(s, "browse: cannot open %s", path); __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE); return -1; }
+    flist_t *f = s->fl[1 - __atomic_load_n(&s->fl_act, __ATOMIC_ACQUIRE)];
+    int n = 0;
+    if (strcmp(path, "/")) { snprintf(f->e[0].name, sizeof f->e[0].name, ".."); f->e[0].dir = 2; n = 1; }
+    int base = n;
+    struct dirent *e;
+    while ((e = readdir(d)) && n < MAXENT) {
+        if (e->d_name[0] == '.' || strlen(e->d_name) >= sizeof f->e[0].name) continue;     /* hidden files (and "._x" junk) stay out */
+        int isdir = path_is_dir(path, e);
+        if (!isdir && !has_wav_ext(e->d_name)) continue;
+        snprintf(f->e[n].name, sizeof f->e[n].name, "%s", e->d_name);
+        f->e[n].dir = (unsigned char)isdir;
+        n++;
+    }
+    closedir(d);
+    qsort(f->e + base, (size_t)(n - base), sizeof f->e[0], cmp_fe);
+    f->n = n; f->nd = 0; f->nw = 0;
+    for (int i = base; i < n; i++) { if (f->e[i].dir) f->nd++; else f->nw++; }
+    snprintf(f->dir, sizeof f->dir, "%s", path);
+    int idx = 0;
+    if (sel && sel[0]) for (int i = 0; i < n; i++) if (!strcmp(f->e[i].name, sel)) { idx = i; if (found) *found = i; break; }
+    s->v[P_wav] = (float)idx;
+    s->fl_err = 0;
+    __atomic_store_n(&s->fl_act, 1 - s->fl_act, __ATOMIC_RELEASE);
+    __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
+    wlog(s, "browse: %s (%d folders, %d WAV files)", path, f->nd, f->nw);
+    char mem[700];                                                      /* the last folder is remembered for the next start */
+    snprintf(mem, sizeof mem, "%s/browse.txt", s->data_dir);
+    FILE *fp = fopen(mem, "w");
+    if (fp) { fprintf(fp, "%s\n", path); fclose(fp); }
+    return 0;
+}
+
+static void worker_load_path(wr_t *s, const char *path) {
     wav_t w;
     memset(&w, 0, sizeof w);
-    if (wav_read(path, &w)) { wlog(s, "WAV %s: not readable (16/24/32-bit PCM or 32-bit float)", s->wavnames[idx]); return; }
+    const char *nm = strrchr(path, '/');
+    nm = nm ? nm + 1 : path;
+    if (wav_read(path, &w)) { wlog(s, "WAV %s: not readable (16/24/32-bit PCM or 32-bit float)", nm); return; }
     int act = s->wav_act, dst = 1 - act;
     s->wavs[dst] = w;                                   /* the slot the audio side is not reading */
     __atomic_store_n(&s->wav_act, dst, __ATOMIC_RELEASE);
@@ -372,9 +444,61 @@ static void worker_load_wav(wr_t *s, int idx) {
     wav_t old = s->wavs[act];
     s->wavs[act].l = s->wavs[act].r = NULL; s->wavs[act].n = 0;
     free(old.l); free(old.r);
-    s->wav_loaded_idx = idx;
-    wlog(s, "WAV %s: %d samples (%.1f s)", s->wavnames[idx], w.n, (double)w.n / SR);
+    snprintf(s->wav_loaded, sizeof s->wav_loaded, "%s", path);
+    wlog(s, "WAV %s: %d samples (%.1f s)", nm, w.n, (double)w.n / SR);
     __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
+}
+
+/* one browser move. history: a new folder drops what was ahead of it; BACK / FWD only walk it */
+static void do_nav(wr_t *s, int nav, const char *p, const char *sel, int selload) {
+    const flist_t *cur = s->fl[__atomic_load_n(&s->fl_act, __ATOMIC_ACQUIRE)];
+    char target[512], keep[96] = "";
+    int push = 1, hp2 = s->hp;
+    snprintf(target, sizeof target, "%s", cur->dir[0] ? cur->dir : "/");
+    if (sel && sel[0]) snprintf(keep, sizeof keep, "%s", sel);
+    switch (nav) {
+    case NV_RESCAN: push = 0;
+        if (!keep[0]) { int k = (int)lroundf(s->v[P_wav]); if (k > 0 && k < cur->n) snprintf(keep, sizeof keep, "%s", cur->e[k].name); }   /* keep your place */
+        break;
+    case NV_PATH: snprintf(target, sizeof target, "%s", p && p[0] ? p : "/"); break;
+    case NV_UP: {
+        char *sl = strrchr(target, '/');
+        if (!strcmp(target, "/")) return;
+        snprintf(keep, sizeof keep, "%s", sl ? sl + 1 : "");        /* the cursor lands on the folder you came out of */
+        if (sl == target) target[1] = 0; else if (sl) *sl = 0;
+        break;
+    }
+    case NV_ROOT: snprintf(target, sizeof target, "/"); break;
+    case NV_BACK: if (s->hp <= 0) return; push = 0; hp2 = s->hp - 1; snprintf(target, sizeof target, "%s", s->hist[hp2]); break;
+    case NV_FWD: if (s->hp >= s->hn - 1) return; push = 0; hp2 = s->hp + 1; snprintf(target, sizeof target, "%s", s->hist[hp2]); break;
+    default: return;
+    }
+    size_t tl = strlen(target);
+    while (tl > 1 && target[tl - 1] == '/') target[--tl] = 0;
+    int found = -1;
+    if (list_dir(s, target, keep, &found)) return;                  /* cannot open: stay where we are */
+    if (push && (s->hn == 0 || strcmp(s->hist[s->hp], target))) {
+        s->hn = s->hp + 1;                                          /* forget the way forward */
+        if (s->hn >= HN) { memmove(s->hist[0], s->hist[1], sizeof s->hist[0] * (HN - 1)); s->hn = HN - 1; }
+        snprintf(s->hist[s->hn], sizeof s->hist[0], "%s", target);
+        s->hp = s->hn; s->hn++;
+    } else if (!push && nav != NV_RESCAN) s->hp = hp2;
+    if (selload && found >= 0) {
+        const flist_t *f = s->fl[__atomic_load_n(&s->fl_act, __ATOMIC_ACQUIRE)];
+        if (!f->e[found].dir) { char full[700]; ent_full(f, found, full, sizeof full); worker_load_path(s, full); }
+    }
+}
+
+static void scan_start(wr_t *s) {                                   /* first folder: the one you left, else /media, else / */
+    char mem[700], dir[512] = "";
+    snprintf(mem, sizeof mem, "%s/browse.txt", s->data_dir);
+    FILE *fp = fopen(mem, "r");
+    if (fp) { if (fgets(dir, sizeof dir, fp)) dir[strcspn(dir, "\r\n")] = 0; fclose(fp); }
+    struct stat st;
+    if (!dir[0] || stat(dir, &st) || !S_ISDIR(st.st_mode)) snprintf(dir, sizeof dir, "%s", (!stat("/media", &st) && S_ISDIR(st.st_mode)) ? "/media" : "/");
+    if (list_dir(s, dir, "", NULL) && list_dir(s, "/", "", NULL)) return;
+    snprintf(s->hist[0], sizeof s->hist[0], "%s", FLA(s)->dir);
+    s->hn = 1; s->hp = 0;
 }
 
 static void worker_save(wr_t *s) {
@@ -391,13 +515,13 @@ static void worker_save(wr_t *s) {
     if (!f) { wlog(s, "save: cannot write %s", path); return; }
     fprintf(f, "wreck=1\n");
     for (int i = 0; i < NP; i++) {
-        if (WP[i].fmt == F_TRIG || i == P_p_bank || i == P_p_sel || i == P_wav || i == P_wav_prev || i == P_wav_next || (i >= P_wl_1 && i <= P_wl_8) || i == P_wav_info) continue;
+        if (WP[i].fmt == F_TRIG || i == P_p_bank || i == P_p_sel || i == P_wav || i == P_wav_prev || i == P_wav_next || (i >= P_wl_1 && i <= P_wl_8) || i == P_wav_info || i == P_wav_path) continue;
         fprintf(f, "%s=%g\n", WP[i].key, s->save_v[i]);
     }
-    if (s->save_wav[0]) fprintf(f, "wavname=%s\n", s->save_wav);      /* the WAV by its name, never the audio */
+    if (s->save_wav[0]) { fprintf(f, "wavdir=%s\n", s->save_wavdir); fprintf(f, "wavname=%s\n", s->save_wav); }   /* the WAV by folder and name, never the audio */
     fclose(f);
     wlog(s, "saved %s", path);
-    scan_all(s);
+    scan_user(s);
 }
 
 static void worker_user(wr_t *s, int idx) {
@@ -420,12 +544,24 @@ static void *worker(void *p) {
     wr_t *s = p;
     pthread_mutex_lock(&s->mu);
     while (!s->quit) {
-        if (!(s->req_scan || s->req_wav >= 0 || s->req_save || s->req_user >= 0)) { pthread_cond_wait(&s->cv, &s->mu); continue; }
-        int scan = s->req_scan, wv = s->req_wav, sv = s->req_save, us = s->req_user;
-        s->req_scan = 0; s->req_wav = -1; s->req_save = 0; s->req_user = -1;
+        if (!(s->req_scan || s->nq_head != s->nq_tail || s->req_wavf || s->req_save || s->req_user >= 0)) { pthread_cond_wait(&s->cv, &s->mu); continue; }
+        int scan = s->req_scan, wvf = s->req_wavf, sv = s->req_save, us = s->req_user;
+        char wavp[700];
+        memcpy(wavp, s->req_wavp, sizeof wavp);
+        s->req_scan = 0; s->req_wavf = 0; s->req_save = 0; s->req_user = -1;
         pthread_mutex_unlock(&s->mu);
-        if (scan) scan_all(s);
-        if (wv >= 0) worker_load_wav(s, wv);
+        if (scan) scan_user(s);
+        for (;;) {                                                  /* the browser moves, oldest first */
+            pthread_mutex_lock(&s->mu);
+            if (s->nq_head == s->nq_tail) { pthread_mutex_unlock(&s->mu); break; }
+            int nav = s->nq[s->nq_head].nav, selload = s->nq[s->nq_head].selload;
+            char navp[512], sel[96];
+            memcpy(navp, s->nq[s->nq_head].path, sizeof navp); memcpy(sel, s->nq[s->nq_head].sel, sizeof sel);
+            s->nq_head = (s->nq_head + 1) & 7;
+            pthread_mutex_unlock(&s->mu);
+            do_nav(s, nav, navp, sel, selload);
+        }
+        if (wvf) worker_load_path(s, wavp);
         if (sv) worker_save(s);
         if (us >= 0) worker_user(s, us);
         pthread_mutex_lock(&s->mu);
@@ -433,12 +569,30 @@ static void *worker(void *p) {
     pthread_mutex_unlock(&s->mu);
     return NULL;
 }
-static void post(wr_t *s, int scan, int wav, int save, int user) {
+static void post(wr_t *s, int scan, int save, int user) {
     pthread_mutex_lock(&s->mu);
     if (scan) s->req_scan = 1;
-    if (wav >= 0) s->req_wav = wav;
     if (save) s->req_save = 1;
     if (user >= 0) s->req_user = user;
+    pthread_cond_signal(&s->cv);
+    pthread_mutex_unlock(&s->mu);
+}
+static void post_nav(wr_t *s, int nav, const char *path, const char *sel, int selload) {
+    pthread_mutex_lock(&s->mu);
+    int t = (s->nq_tail + 1) & 7;
+    if (t != s->nq_head) {                                          /* a full queue drops the newest */
+        s->nq[s->nq_tail].nav = nav; s->nq[s->nq_tail].selload = selload;
+        snprintf(s->nq[s->nq_tail].path, sizeof s->nq[0].path, "%s", path ? path : "");
+        snprintf(s->nq[s->nq_tail].sel, sizeof s->nq[0].sel, "%s", sel ? sel : "");
+        s->nq_tail = t;
+    }
+    pthread_cond_signal(&s->cv);
+    pthread_mutex_unlock(&s->mu);
+}
+static void post_wav(wr_t *s, const char *full) {
+    pthread_mutex_lock(&s->mu);
+    s->req_wavf = 1;
+    snprintf(s->req_wavp, sizeof s->req_wavp, "%s", full);
     pthread_cond_signal(&s->cv);
     pthread_mutex_unlock(&s->mu);
 }
@@ -452,20 +606,23 @@ static void *w_create(const char *data_dir) {
     if (!s->bl || !s->br) { free(s->bl); free(s->br); free(s); return NULL; }
     s->rng = 0x9e3779b9u ^ (uint32_t)time(NULL);
     apply_defaults(s, 0);
-    s->bpm = 120; s->lim_g = 1; s->att_sys = -1; s->req_wav = -1; s->req_user = -1; s->last_note = 60; s->last_k = -1;
+    s->bpm = 120; s->lim_g = 1; s->att_sys = -1; s->req_user = -1; s->last_note = 60; s->last_k = -1;
     s->att[0] = 0.1f; s->att[1] = 0.0f; s->att[2] = 0.0f;
     s->hg_a[0] = 1; s->hg_a[1] = 1; s->hg_a[2] = 1; s->hg_a[3] = 1;
     s->cl_x = 0.1f; s->cl_y = 0.1f; s->cl_x1 = 0.1f; s->cl_y1 = 0.1f;
     for (int i = 0; i < VW_VOICES; i++) s->view.vpos[i] = -1;
     for (int i = 0; i < 4; i++) s->rv_len[i] = 0;
-    s->wav_loaded_idx = -1;
+    s->fl[0] = calloc(1, sizeof(flist_t)); s->fl[1] = calloc(1, sizeof(flist_t));
+    if (!s->fl[0] || !s->fl[1]) { free(s->fl[0]); free(s->fl[1]); free(s->bl); free(s->br); free(s); return NULL; }
+    snprintf(s->fl[0]->dir, sizeof s->fl[0]->dir, "/");
     if (data_dir && data_dir[0]) {
         snprintf(s->data_dir, sizeof s->data_dir, "%s", data_dir);
         snprintf(s->logp, sizeof s->logp, "%s/wreck.log", data_dir);
         pthread_mutex_init(&s->mu, NULL);
         pthread_cond_init(&s->cv, NULL);
         if (!pthread_create(&s->th, NULL, worker, s)) s->started = 1;
-        scan_all(s);
+        scan_user(s);
+        scan_start(s);
         view_start(&s->ov, data_dir, &s->view);
     }
     return s;
@@ -483,6 +640,7 @@ static void w_destroy(void *p) {
     }
     free(s->wavs[0].l); free(s->wavs[0].r); free(s->wavs[1].l); free(s->wavs[1].r);
     free(s->pend_text);
+    free(s->fl[0]); free(s->fl[1]);
     free(s->bl); free(s->br);
     free(s);
 }
@@ -619,47 +777,72 @@ static void w_midi(void *p, const uint8_t *m, int len) {
 }
 
 /* ---------------------------------------------------------------------------------------------- params API */
+/* a tap on a row, or OPEN on the cursor: ".." goes up, a folder opens, a WAV loads and becomes the source */
+static void browse_open(wr_t *s, int k) {
+    const flist_t *f = FLA(s);
+    if (k < 0 || k >= f->n) return;
+    char full[700];
+    ent_full(f, k, full, sizeof full);
+    if (f->e[k].dir == 2) { post_nav(s, NV_UP, "", "", 0); return; }
+    if (f->e[k].dir) { post_nav(s, NV_PATH, full, "", 0); return; }
+    s->v[P_wav] = (float)k; s->v[P_src] = 2.0f;
+    post_wav(s, full);
+    __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
+}
+
 static void w_set(void *p, const char *key, const char *val) {
     wr_t *s = p;
-    if (!strcmp(key, "state")) {
-        const char *w = strstr(val, "wav=");
-        if (w) {
-            char nm[64];
-            size_t n = strcspn(w + 4, "|");
-            if (n < sizeof nm) {
-                memcpy(nm, w + 4, n); nm[n] = 0;
-                for (int i = 0; i < s->nwav; i++) if (!strcmp(s->wavnames[i], nm)) { s->v[P_wav] = (float)i; post(s, 0, i, 0, -1); break; }
-            }
+    if (!strcmp(key, "state")) {                        /* "W2|dir=<folder>|wav=<file>|" (an older "W1|wav=<file>|" has no folder) */
+        char dr[512] = "", nm[96] = "";
+        const char *w = NULL;
+        if (!strncmp(val, "W2|dir=", 7)) {
+            const char *e = strstr(val + 7, "|wav=");
+            if (e) { size_t n = (size_t)(e - (val + 7)); if (n < sizeof dr) { memcpy(dr, val + 7, n); dr[n] = 0; } w = e + 5; }
+        } else {
+            w = strstr(val, "wav=");
+            if (w) w += 4;
         }
+        if (w) { size_t n = strcspn(w, "|"); if (n < sizeof nm) { memcpy(nm, w, n); nm[n] = 0; } }
+        if (nm[0]) post_nav(s, dr[0] ? NV_PATH : NV_RESCAN, dr, nm, 1);
         return;
     }
     int i = key_index(key);
     if (i < 0) return;
     float x = (float)atof(val);
-    if (i >= P_wl_1 && i <= P_wl_8) {                   /* a tap on a file row: choose it, load it, make WAV the source */
+    if (i >= P_wl_1 && i <= P_wl_8) {                   /* a tap on a row: a folder opens, a WAV loads and becomes the source */
         if (x < 0.5f) return;
-        int k = ((int)lroundf(s->v[P_wav]) / 8) * 8 + (i - P_wl_1);
-        if (k < s->nwav) {
-            s->v[P_wav] = (float)k; s->v[P_src] = 2.0f;
-            post(s, 0, k, 0, -1);
-            __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
-        }
+        browse_open(s, ((int)lroundf(s->v[P_wav]) / 8) * 8 + (i - P_wl_1));
         return;
     }
     if (WP[i].fmt == F_TRIG) {
         if (x < 0.5f) return;
-        if (i == P_wav_scan) { post(s, 1, -1, 0, -1); return; }
-        if (i == P_wav_use) { s->v[P_src] = 2.0f; if (s->nwav > 0 && s->wav_loaded_idx != (int)s->v[P_wav]) post(s, 0, (int)s->v[P_wav], 0, -1); __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE); return; }
+        if (i == P_wav_scan) { post_nav(s, NV_RESCAN, "", "", 0); post(s, 1, 0, -1); return; }
+        if (i == P_wav_up) { post_nav(s, NV_UP, "", "", 0); return; }
+        if (i == P_wav_root) { post_nav(s, NV_ROOT, "", "", 0); return; }
+        if (i == P_wav_back) { post_nav(s, NV_BACK, "", "", 0); return; }
+        if (i == P_wav_fwd) { post_nav(s, NV_FWD, "", "", 0); return; }
+        if (i == P_wav_open) { browse_open(s, (int)lroundf(s->v[P_wav])); return; }
+        if (i == P_wav_use) {
+            s->v[P_src] = 2.0f;
+            const flist_t *f = FLA(s);
+            int k = (int)lroundf(s->v[P_wav]);
+            if (k >= 0 && k < f->n && !f->e[k].dir) { char full[700]; ent_full(f, k, full, sizeof full); if (strcmp(full, s->wav_loaded)) post_wav(s, full); }
+            __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
+            return;
+        }
         if (i == P_p_load) {
             if (s->v[P_p_bank] < 0.5f) {
                 load_factory(s, (int)s->v[P_p_sel]);
-                post(s, 0, (int)s->v[P_wav], 0, -1);
-            } else post(s, 0, -1, 0, (int)s->v[P_p_sel]);
+            } else post(s, 0, 0, (int)s->v[P_p_sel]);
         } else if (i == P_p_save) {
             memcpy(s->save_v, s->v, sizeof s->v);
-            int w = (int)s->v[P_wav];
-            snprintf(s->save_wav, sizeof s->save_wav, "%s", (w >= 0 && w < s->nwav && s->v[P_src] > 1.5f && s->v[P_src] < 2.5f) ? s->wavnames[w] : "");
-            post(s, 0, -1, 1, -1);
+            s->save_wav[0] = 0; s->save_wavdir[0] = 0;               /* the loaded WAV, by folder and name, when WAV is the source */
+            const char *lp = s->wav_loaded, *sl = strrchr(lp, '/');
+            if (sl && s->v[P_src] > 1.5f && s->v[P_src] < 2.5f) {
+                snprintf(s->save_wav, sizeof s->save_wav, "%s", sl + 1);
+                snprintf(s->save_wavdir, sizeof s->save_wavdir, "%.*s", sl == lp ? 1 : (int)(sl - lp), lp);
+            }
+            post(s, 0, 1, -1);
         } else if (i == P_p_init) {
             apply_defaults(s, 1);
             __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);
@@ -674,10 +857,14 @@ static void w_set(void *p, const char *key, const char *val) {
     }
     float old = s->v[i];
     set_idx(s, i, x);
-    if (i == P_wav && s->nwav > 0 && s->v[i] >= (float)s->nwav) s->v[i] = (float)(s->nwav - 1);   /* the stepper stops at the last file */
+    if (i == P_wav) {                                   /* the stepper stops at the last entry; stepping onto a WAV loads it */
+        const flist_t *f = FLA(s);
+        if (f->n > 0 && s->v[i] >= (float)f->n) s->v[i] = (float)(f->n - 1);
+        int k = (int)lroundf(s->v[i]);
+        if (s->v[i] != old && k >= 0 && k < f->n && !f->e[k].dir) { char full[700]; ent_full(f, k, full, sizeof full); post_wav(s, full); }
+    }
     if (i == P_src_level || i == P_b1_level || i == P_b2_mix || i == P_b3_level || i == P_b4_level || i == P_b5_level || i == P_level ||
         (i >= P_b1_on && i <= P_b5_on)) __atomic_add_fetch(&s->rev, 1, __ATOMIC_RELEASE);   /* the chain strip's numbers */
-    if (i == P_wav && s->v[i] != old) post(s, 0, (int)s->v[i], 0, -1);
     if (i == P_a_on && s->v[i] < 0.5f && old >= 0.5f) arp_clear(s);
     if (i == P_a_latch && s->v[i] < 0.5f && old >= 0.5f && s->phys_down == 0) { s->nheld = 0; }
     if (i == P_o_stut_on && s->v[i] > 0.5f && old < 0.5f) s->st_active = -1;   /* capture on the next block */
@@ -686,19 +873,23 @@ static void w_set(void *p, const char *key, const char *val) {
 static int w_get(void *p, const char *key, char *buf, int len) {
     wr_t *s = p;
     if (!strcmp(key, "display_rev")) return snprintf(buf, (size_t)len, "%d", s->rev);
-    if (!strcmp(key, "state")) {
-        int w = (int)s->v[P_wav];
-        return snprintf(buf, (size_t)len, "W1|wav=%s|", (w >= 0 && w < s->nwav) ? s->wavnames[w] : "");
+    if (!strcmp(key, "state")) {                        /* the loaded WAV by folder and name; never the audio */
+        const char *lp = s->wav_loaded, *sl = strrchr(lp, '/');
+        if (!sl) return snprintf(buf, (size_t)len, "W2|dir=|wav=|");
+        return snprintf(buf, (size_t)len, "W2|dir=%.*s|wav=%s|", sl == lp ? 1 : (int)(sl - lp), lp, sl + 1);
     }
-    if (!strncmp(key, "wl_", 3) && key[3] >= '1' && key[3] <= '8') {         /* SAMPLES page: the eight rows of the page that holds the chosen file */
-        int cur = (int)lroundf(s->v[P_wav]), n = __atomic_load_n(&s->nwav, __ATOMIC_ACQUIRE);
+    if (!strncmp(key, "wl_", 3) && key[3] >= '1' && key[3] <= '8') {         /* SAMPLES page: the eight rows of the page that holds the cursor */
+        const flist_t *f = FLA(s);
+        int cur = (int)lroundf(s->v[P_wav]), n = f->n;
         int k = (cur / 8) * 8 + (key[3] - '1');
         if (key[4] == 0) {
             if (k < n) {
-                char t[64]; snprintf(t, sizeof t, "%s", s->wavnames[k]);
+                if (f->e[k].dir == 2) return snprintf(buf, (size_t)len, "..");
+                char t[96]; snprintf(t, sizeof t, "%s", f->e[k].name);
                 size_t tl = strlen(t);
+                if (f->e[k].dir) { char u[100]; snprintf(u, sizeof u, "/%s", t); return snprintf(buf, (size_t)len, "%.40s", u); }
                 if (tl > 4 && !strcasecmp(t + tl - 4, ".wav")) t[tl - 4] = 0;
-                return snprintf(buf, (size_t)len, "%.31s", t);
+                return snprintf(buf, (size_t)len, "%.40s", t);
             }
             return snprintf(buf, (size_t)len, " ");
         }
@@ -1095,7 +1286,7 @@ static void w_render(void *p, int16_t *out, int frames) {
     { unsigned fp; __asm__ volatile("vmrs %0, fpscr" : "=r"(fp)); fp |= 1u << 24; __asm__ volatile("vmsr fpscr, %0" ::"r"(fp)); }   /* flush denormals to zero */
 #endif
     char *pt = __atomic_exchange_n(&s->pend_text, NULL, __ATOMIC_ACQ_REL);
-    if (pt) { apply_text(s, pt); free(pt); post(s, 0, (int)s->v[P_wav], 0, -1); }
+    if (pt) { apply_text(s, pt); free(pt); }
 
     eff_t E;
     compute_eff(s, &E);

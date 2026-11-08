@@ -1,5 +1,7 @@
 # Wreck 0.1.2 – unverified items, guesses, and what differs from the mock-up
 
+**Update 2026-11-08 (0.2.0):** the SAMPLES page is now a file browser (UP, ROOT, BACK, FWD, OPEN / LOAD, folder path, WAV from any folder). Offline only: an x86 build of the engine was driven through folders, history, loading and preset save/load with AddressSanitizer, and the ARM build and release zip passed the installer and catalog checks. NOT RUN on a Force: browsing the external drive (where it is mounted is not known), loading a WAV from it, the new buttons and the data wheel on the folder list, and the 8-row list highlight while moving between folders.
+
 **Update 2026-11-08:** 0.1.3 has the same plugin file as 0.1.2 (identical `wreck.so`); only the license changed. The notes below describe 0.1.2.
 
 **Update 2026-11-07:** 0.1.2 has been verified working on an Akai Force (reported by the maintainer). The notes below were written before that test; they list what was changed and what the offline checks could not show.
